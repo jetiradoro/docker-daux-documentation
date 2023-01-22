@@ -1,0 +1,40 @@
+version: '2'
+
+services:
+  wiki-web:
+    image: nginx
+    container_name: epolca-wiki-web
+    restart: unless-stopped
+    environment:
+      - VIRTUAL_HOST=docs.epolca.loc
+    volumes:
+      - ../../:/var/www:ro
+      - ./nginx_default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - wiki-php
+    networks:
+      docker-net:
+
+  wiki-php:
+    image: php:8.2-fpm
+    restart: unless-stopped
+    container_name: epolca-wiki-php
+    working_dir: /var/www/
+    volumes:
+      - ../../:/var/www/
+    networks:
+      docker-net:
+  daux:
+    image: daux/daux.io
+    restart: unless-stopped
+    container_name: epolca-daux
+    working_dir: /build
+    volumes:
+      - ../../:/var/www/
+      - ../../build:/build
+    command: tail -f /build/docs/config.json
+    networks:
+      docker-net:
+networks:
+  docker-net:
+    external: true
